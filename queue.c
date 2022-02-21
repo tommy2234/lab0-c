@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -277,30 +278,15 @@ void q_reverse(struct list_head *head)
 /* merge 2 list in ascending order */
 struct list_head *merge(struct list_head *L1, struct list_head *L2)
 {
-    element_t *ele1 = container_of(L1, element_t, list);
-    element_t *ele2 = container_of(L2, element_t, list);
-    struct list_head **node = strcmp(ele1->value, ele2->value) < 0 ? &L1 : &L2;
-    struct list_head *head = *node, *ptr = head;
-    *node = (*node)->next;
-    while (L1 && L2) {
+    struct list_head *head = NULL, **ptr = &head, **node = NULL;
+    for (element_t *ele1, *ele2; L1 && L2; *node = (*node)->next) {
         ele1 = container_of(L1, element_t, list);
         ele2 = container_of(L2, element_t, list);
         node = strcmp(ele1->value, ele2->value) < 0 ? &L1 : &L2;
-        ptr->next = *node;
-        (*node)->prev = ptr;
-        ptr = *node;
-
-        // this line failed to pass stupid cppcheck
-        //*node = (*node)->next;
-        if (strcmp(ele1->value, ele2->value) < 0)
-            L1 = L1->next;
-        else
-            L2 = L2->next;
+        *ptr = *node;
+        ptr = &(*node)->next;
     }
-    node = L1 ? &L1 : &L2;
-    ptr->next = *node;
-    (*node)->prev = ptr;
-
+    *ptr = (struct list_head *) ((uintptr_t) L1 | (uintptr_t) L2);
     return head;
 }
 
@@ -339,17 +325,16 @@ void q_sort(struct list_head *head)
     if (!head || list_empty(head))
         return;
 
-    // set tail to NULL for the convenience of terminating the iteration in
+    // set tail to NULL for the convenience of terminating the iteration
     head->prev->next = NULL;
 
     // merge sort
     head->next = merge_sort(head->next);
-    head->next->prev = head;
 
-    // connect head and tail
-    struct list_head *tmp = head;
-    while (tmp->next)
-        tmp = tmp->next;
+    // set prev of each node, and connect head and tail
+    struct list_head *tmp;
+    for (tmp = head; tmp->next; tmp = tmp->next)
+        tmp->next->prev = tmp;
     tmp->next = head;
     head->prev = tmp;
 }
