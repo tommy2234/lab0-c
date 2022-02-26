@@ -37,6 +37,7 @@
  */
 
 #include <stddef.h>
+#include "tiny.h"
 #ifndef __LINENOISE_H
 #define __LINENOISE_H
 

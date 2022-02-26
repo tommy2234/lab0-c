@@ -38,6 +38,7 @@
 #include "report.h"
 
 /* Settable parameters */
+int listenfd = 0;
 
 #define HISTORY_LEN 20
 
@@ -922,6 +923,16 @@ static bool do_show(int argc, char *argv[])
     return show_queue(0);
 }
 
+static bool do_web(int argc, char *argv[])
+{
+    if (!listenfd) {
+        listenfd = get_listenfd(argc, argv);
+        report(3, "Launching tiny web server");
+    } else
+        report(3, "Tiny web server has already been launched");
+    return true;
+}
+
 static void console_init()
 {
     ADD_COMMAND(new, "                | Create new queue");
@@ -958,6 +969,7 @@ static void console_init()
     ADD_COMMAND(swap,
                 "                | Swap every two adjacent nodes in queue");
     ADD_COMMAND(shuffle, "                | Shuffle the queue");
+    ADD_COMMAND(web, "                | web");
     add_param("length", &string_length, "Maximum length of displayed string",
               NULL);
     add_param("malloc", &fail_probability, "Malloc failure probability percent",
