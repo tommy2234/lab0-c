@@ -29,7 +29,6 @@ typedef struct {
 extern int listenfd;
 
 int get_listenfd(int argc, char **argv);
-void parse_request(int fd, http_request *req);
 
 // get the function_name
 char *process(int fd, struct sockaddr_in *clientaddr);
